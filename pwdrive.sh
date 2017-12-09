@@ -71,7 +71,7 @@ pwdrive_get() {
 pwdrive_set() {
     name="$1"
     [ -n "$name" ] || _die "Expected entry param (pwdrive_set)"
-    [ "$stdin_is_pipe" -eq 1 ] && read pass
+    [ "$stdin_is_pipe" -eq 1 ] && pass="$(cat)"
     [ -n "$pass" ] || pass="$2"
     [ -n "$pass" ] || _die "Expected pass as param or stdin (pwdrive_set)"
     _fetch_file_id_by_name "$name"
