@@ -1,7 +1,13 @@
 # pwdrive
 
 pwdrive is a GnuPG and Google Drive-based password vault written in Bash.
-Passwords are stored as base64-encoded GnuPG-encrypted files on Google Drive.
+Passwords are stored as GnuPG-encrypted files on Google Drive.
+
+### Synopsis
+
+    $ pwdrive set aol leetpw
+    $ pwdrive get aol
+    leetpw
 
 ### Requirements
 
@@ -13,15 +19,27 @@ You also need a working GPG setup:
 
 https://www.gnupg.org/gph/en/manual/c14.html
 
-### Installing
+### How it works
 
-To install to `/usr/local/bin`:
+For the encryption half, passwords are encrypted via GnuPG in 2048-bit RSA by
+default. They are then base64-encoded and uploaded to Google Drive storage.
+Access to Google Drive requires an OAuth token (granted by the end-user) which
+is stored at `~/.pwdrive/refresh_token` by default.
 
-    # make install
+For the decryption half, again an OAuth token is required to download the
+encrypted password via the Google Drive API. The same private key used to
+encrypt the password is needed at decrypt time. If the key is password-protected
+(recommended) you need that as well. Note that there may be an agent running on
+your system that remembers your GPG key passwords for some period of time.
 
-To install to a custom directory, supply `DESTDIR`, e.g.:
+All traffic to and from Google is transported over HTTPS.
 
-    # DESTDIR=/usr/bin make install
+So, as per usual, the main thing to keep safe is your GPG key.
+
+The OAuth token in `~/.pwdrive` is regenerateable if it is lost or if it
+expires. Simply delete it and pwdrive will prompt you to create another one. If
+the token is stolen, an attacker will have access to encrypted password content
+which is very difficult to brute force without the GPG key.
 
 ### Usage
 
@@ -42,6 +60,16 @@ To install to a custom directory, supply `DESTDIR`, e.g.:
         PWDRIVE_ACCESS_TOKEN  Use this access token instead of fetching one
         PWDRIVE_HOME          Home dir of pwdrive (~/.pwdrive)
         PWDRIVE_GPG_ARGS      Extra args for get/set (--no-options --default-recipient-self --quiet)
+
+### Installing
+
+To install to `/usr/local/bin`:
+
+    # make install
+
+To install to a custom directory, supply `DESTDIR`, e.g.:
+
+    # DESTDIR=/usr/bin make install
 
 ### Tip
 
