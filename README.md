@@ -5,8 +5,10 @@ Passwords are stored as GnuPG-encrypted files on Google Drive.
 
 ### Synopsis
 
-    $ pwdrive set aol leetpw
-    $ pwdrive get aol
+    $ pwdrive set aol leetpw    # Store encrypted entry
+    $ pwdrive ls                # List entries
+    aol
+    $ pwdrive get aol           # Fetch and decrypt entry
     leetpw
 
 ### Requirements
