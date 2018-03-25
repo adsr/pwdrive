@@ -54,11 +54,13 @@ which is very difficult to brute force without the GPG key.
         set <entry> <pass>    Set password for entry
         set <entry> -         Set password for entry from stdin
         get <entry>           Get password for entry
+        edit <entry>          Edit password for entry via $EDITOR
         rm <entry>            Remove entry
         token                 Print an access token
         help                  Show pwdrive usage
 
     Environment:
+        EDITOR                Editor to use with edit (vim)
         PWDRIVE_ACCESS_TOKEN  Use this access token instead of fetching one
         PWDRIVE_HOME          Home dir of pwdrive (~/.pwdrive)
         PWDRIVE_GPG_ARGS      Extra args for get/set (--no-options --default-recipient-self --quiet)

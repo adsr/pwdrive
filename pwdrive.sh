@@ -3,7 +3,7 @@ set -o pipefail
 
 pwdrive_desc='GnuPG+GDrive-based password vault'
 pwdrive_url='https://github.com/adsr/pwdrive'
-pwdrive_version='0.2'
+pwdrive_version='0.3'
 pwdrive_cmd=$1
 shift
 
@@ -15,6 +15,7 @@ pwdrive_main() {
         ls)         _require_access_token && pwdrive_ls "$@";;
         set)        _require_access_token && pwdrive_set "$@";;
         get)        _require_access_token && pwdrive_get "$@";;
+        edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
         help)       pwdrive_usage 0;;
@@ -33,11 +34,13 @@ pwdrive_usage() {
     echo "    set <entry> <pass>    Set password for entry"
     echo "    set <entry> -         Set password for entry from stdin"
     echo "    get <entry>           Get password for entry"
+    echo "    edit <entry>          Edit password for entry via \$EDITOR"
     echo "    rm <entry>            Remove entry"
     echo "    token                 Print an access token"
     echo "    help                  Show pwdrive usage"
     echo
     echo "Environment:"
+    echo "    EDITOR                Editor to use with edit (${EDITOR:-<unset>})"
     echo "    PWDRIVE_ACCESS_TOKEN  Use this access token instead of fetching one"
     echo "    PWDRIVE_HOME          Home dir of pwdrive ($home_dir)"
     echo "    PWDRIVE_GPG_ARGS      Extra args for get/set (${gpg_args:-<none>})"
@@ -82,8 +85,7 @@ pwdrive_set() {
         method='POST'
         uri=''
     fi
-    post_data=$(
-    mktemp /tmp/pwdrive.XXXXXX)
+    post_data=$(mktemp /tmp/pwdrive.XXXXXX)
     echo -en "--$boundary\r\n" >$post_data
     echo -en "Content-Type: application/json; charset=UTF-8\r\n\r\n" >>$post_data
     echo -en "{\"name\":\"$name\"}\r\n" >>$post_data
@@ -99,6 +101,19 @@ pwdrive_set() {
     curlec="$?"
     rm -f $post_data
     [ "$curlec" -eq 0 ] || _die "Query failed: www.googleapis.com/upload/drive/v3/files (pwdrive_set)"
+}
+
+pwdrive_edit() {
+    [ -n "$EDITOR" ] || _die "Expected EDITOR env var (pwdrive_edit)"
+    edit_content=$(pwdrive_get "$@")
+    [ "$?" -eq 0 ] || _die "Get failed (pwdrive_edit)"
+    edit_file=$(mktemp /tmp/pwdrive.XXXXXX)
+    echo "$edit_content" >$edit_file
+    $EDITOR $edit_file
+    [ "$?" -eq 0 ] || { rm -f $edit_file; _die "EDITOR exited non-zero (pwdrive_edit)"; }
+    (stdin_is_pipe=1; pwdrive_set "$@" <$edit_file)
+    rm -f $edit_file
+    [ "$?" -eq 0 ] || _die "Set failed (pwdrive_edit)"
 }
 
 pwdrive_rm() {
