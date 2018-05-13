@@ -3,7 +3,7 @@ set -o pipefail
 
 pwdrive_desc='GnuPG+GDrive-based password vault'
 pwdrive_url='https://github.com/adsr/pwdrive'
-pwdrive_version='0.3'
+pwdrive_version='0.4'
 pwdrive_cmd=$1
 shift
 
@@ -30,7 +30,7 @@ pwdrive_usage() {
     echo
     echo "Commands:"
     echo "    ls                    List all entries"
-    echo "    ls <str>              List all entries containing str"
+    echo "    ls <str>              List all entries prefixed by str"
     echo "    set <entry> <pass>    Set password for entry"
     echo "    set <entry> -         Set password for entry from stdin"
     echo "    get <entry>           Get password for entry"
@@ -53,9 +53,10 @@ pwdrive_ls() {
     response=$(curl -sf 'https://www.googleapis.com/drive/v3/files' \
         -G -X GET \
         -H "Authorization: Bearer $access_token" \
+        -d 'spaces=appDataFolder' \
         --data-urlencode "$query")
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files (pwdrive_ls)"
-    echo $response | grep -Po '(?<="name": ").+?(?=")'
+    echo $response | grep -Po '(?<="name": ").+?(?=")' | sort
 }
 
 pwdrive_get() {
@@ -88,7 +89,7 @@ pwdrive_set() {
     post_data=$(mktemp /tmp/pwdrive.XXXXXX)
     echo -en "--$boundary\r\n" >$post_data
     echo -en "Content-Type: application/json; charset=UTF-8\r\n\r\n" >>$post_data
-    echo -en "{\"name\":\"$name\"}\r\n" >>$post_data
+    echo -en "{\"parents\":[\"appDataFolder\"],\"name\":\"$name\"}\r\n" >>$post_data
     echo -en "--$boundary\r\n" >>$post_data
     echo -en "Content-Type: application/octet-stream\r\n\r\n" >>$post_data
     echo -n "$pass" | gpg $gpg_args --encrypt | base64 -w0 >>$post_data
@@ -220,6 +221,7 @@ _fetch_file_id_by_name() {
     response=$(curl -sf 'https://www.googleapis.com/drive/v3/files' \
         -G -X GET \
         -H "Authorization: Bearer $access_token" \
+        -d 'spaces=appDataFolder' \
         --data-urlencode "q=name = '$1'")
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files (_fetch_file_id_by_name)"
     file_id=$(echo $response | grep -Po '(?<="id": ").+?(?=")')

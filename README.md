@@ -15,7 +15,7 @@ Passwords are stored as GnuPG-encrypted files on Google Drive.
 
 In addition to Bash, the following programs need to be in `PATH`:
 
-    gpg curl grep mktemp mkdir cat base64
+    gpg curl grep mktemp mkdir cat base64 sort
 
 You also need a working GPG setup:
 
