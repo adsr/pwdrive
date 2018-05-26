@@ -50,13 +50,14 @@ which is very difficult to brute force without the GPG key.
 
     Commands:
         ls                    List all entries
-        ls <str>              List all entries containing str
+        ls <str>              List all entries prefixed by str
         set <entry> <pass>    Set password for entry
         set <entry> -         Set password for entry from stdin
         get <entry>           Get password for entry
         edit <entry>          Edit password for entry via $EDITOR
         rm <entry>            Remove entry
         token                 Print an access token
+        gen                   Generate some random passwords
         help                  Show pwdrive usage
 
     Environment:

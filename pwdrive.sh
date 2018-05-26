@@ -3,7 +3,7 @@ set -o pipefail
 
 pwdrive_desc='GnuPG+GDrive-based password vault'
 pwdrive_url='https://github.com/adsr/pwdrive'
-pwdrive_version='0.4'
+pwdrive_version='0.5'
 pwdrive_cmd=$1
 shift
 
@@ -18,6 +18,7 @@ pwdrive_main() {
         edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
+        gen)        pwdrive_gen "$@";;
         help)       pwdrive_usage 0;;
         *)          pwdrive_usage 1;;
     esac
@@ -37,6 +38,7 @@ pwdrive_usage() {
     echo "    edit <entry>          Edit password for entry via \$EDITOR"
     echo "    rm <entry>            Remove entry"
     echo "    token                 Print an access token"
+    echo "    gen                   Generate some random passwords"
     echo "    help                  Show pwdrive usage"
     echo
     echo "Environment:"
@@ -128,6 +130,22 @@ pwdrive_rm() {
 
 pwdrive_token() {
     echo $access_token
+}
+
+pwdrive_gen() {
+    chars='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!#$%&*+-=?@^_'
+    nchars=${#chars}
+    p=0; while [ $p -lt 8 ]; do
+        pw=''
+        i=0; while [ $i -lt 16 ]; do
+            r=$((RANDOM % nchars))
+            c=${chars:$r:1}
+            pw="${pw}${c}"
+            i=$((i+1))
+        done
+        echo $pw
+        p=$((p+1))
+    done
 }
 
 _die() {
