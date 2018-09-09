@@ -15,6 +15,7 @@ pwdrive_main() {
         ls)         _require_access_token && pwdrive_ls "$@";;
         set)        _require_access_token && pwdrive_set "$@";;
         get)        _require_access_token && pwdrive_get "$@";;
+        lget)       _require_access_token && pwdrive_lget "$@";;
         edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
@@ -35,6 +36,7 @@ pwdrive_usage() {
     echo "    set <entry> <pass>    Set password for entry"
     echo "    set <entry> -         Set password for entry from stdin"
     echo "    get <entry>           Get password for entry"
+    echo "    lget <str>            Get entry matching str, or ls if multiple"
     echo "    edit <entry>          Edit password for entry via \$EDITOR"
     echo "    rm <entry>            Remove entry"
     echo "    token                 Print an access token"
@@ -72,6 +74,18 @@ pwdrive_get() {
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files/$file_id (pwdrive_get)"
     echo $response | base64 -w0 -d | gpg $gpg_args --decrypt
     echo
+}
+
+pwdrive_lget() {
+    [ -n "$1" ] || _die "Expected str param (pwdrive_lget)"
+    entries=$(pwdrive_ls | grep "$1")
+    if [ -z "$entries" ]; then
+        _die "Nothing found for '$1'"
+    elif [ $(echo "$entries" | wc -l) -eq 1 -a -n "$entries" ]; then
+        pwdrive_get $entries
+    else
+        echo "$entries"
+    fi
 }
 
 pwdrive_set() {

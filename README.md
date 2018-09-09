@@ -54,6 +54,7 @@ which is very difficult to brute force without the GPG key.
         set <entry> <pass>    Set password for entry
         set <entry> -         Set password for entry from stdin
         get <entry>           Get password for entry
+        lget <str>            Get entry matching str, or ls if multiple
         edit <entry>          Edit password for entry via $EDITOR
         rm <entry>            Remove entry
         token                 Print an access token
