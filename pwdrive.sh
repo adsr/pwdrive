@@ -105,7 +105,11 @@ pwdrive_set() {
     post_data=$(mktemp /tmp/pwdrive.XXXXXX)
     echo -en "--$boundary\r\n" >$post_data
     echo -en "Content-Type: application/json; charset=UTF-8\r\n\r\n" >>$post_data
-    echo -en "{\"parents\":[\"appDataFolder\"],\"name\":\"$name\"}\r\n" >>$post_data
+    if [ $method == "POST" ]; then
+        echo -en "{\"parents\":[\"appDataFolder\"],\"name\":\"$name\"}\r\n" >>$post_data
+    else
+        echo -en "{\"name\":\"$name\"}\r\n" >>$post_data
+    fi
     echo -en "--$boundary\r\n" >>$post_data
     echo -en "Content-Type: application/octet-stream\r\n\r\n" >>$post_data
     echo -n "$pass" | gpg $gpg_args --encrypt | base64 -w0 >>$post_data
