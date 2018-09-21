@@ -92,8 +92,14 @@ pwdrive_set() {
     name="$1"
     [ -n "$name" ] || _die "Expected entry param (pwdrive_set)"
     [ "$stdin_is_pipe" -eq 1 ] && pass="$(cat)"
-    [ -n "$pass" ] || pass="$2"
-    [ -n "$pass" ] || _die "Expected pass as param or stdin (pwdrive_set)"
+    [ -z "$pass" -a -n "$2" ] && pass="$2"
+    if [ -z "$pass" ]; then
+        read -sp 'Enter password:' pass1; echo
+        read -sp 'Enter password again:' pass2; echo
+        [ "$pass1" = "$pass2" ] || _die "Passwords do not match (pwdrive_set)"
+        pass=$pass1
+    fi
+    [ -n "$pass" ] || _die "Expected pass as stdin, param, or input (pwdrive_set)"
     _fetch_file_id_by_name "$name"
     if [ -n "$file_id" ]; then
         method='PATCH'
