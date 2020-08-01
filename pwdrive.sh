@@ -162,7 +162,7 @@ pwdrive_gen() {
     nchars=${#chars}
     p=0; while [ $p -lt 8 ]; do
         pw=''
-        i=0; while [ $i -lt 16 ]; do
+        i=0; while [ $i -lt 24 ]; do
             r=$((RANDOM % nchars))
             c=${chars:$r:1}
             pw="${pw}${c}"
