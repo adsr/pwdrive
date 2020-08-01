@@ -58,6 +58,7 @@ pwdrive_ls() {
         -G -X GET \
         -H "Authorization: Bearer $access_token" \
         -d 'spaces=appDataFolder' \
+        -d 'pageSize=1000' \
         --data-urlencode "$query")
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files (pwdrive_ls)"
     echo $response | grep -Po '(?<="name": ").+?(?=")' | sort
