@@ -15,6 +15,7 @@ pwdrive_main() {
         ls)         _require_access_token && pwdrive_ls "$@";;
         set)        _require_access_token && pwdrive_set "$@";;
         get)        _require_access_token && pwdrive_get "$@";;
+        copy)       _require_access_token && pwdrive_copy "$@";;
         lget)       _require_access_token && pwdrive_lget "$@";;
         edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
@@ -36,6 +37,7 @@ pwdrive_usage() {
     echo "    set <entry> <pass>    Set password for entry"
     echo "    set <entry> -         Set password for entry from stdin"
     echo "    get <entry>           Get password for entry"
+    echo "    copy <entry>          Copy password to clipboard"
     echo "    lget <str>            Get entry matching str, or ls if multiple"
     echo "    edit <entry>          Edit password for entry via \$EDITOR"
     echo "    rm <entry>            Remove entry"
@@ -48,6 +50,7 @@ pwdrive_usage() {
     echo "    PWDRIVE_ACCESS_TOKEN  Use this access token instead of fetching one"
     echo "    PWDRIVE_HOME          Home dir of pwdrive ($home_dir)"
     echo "    PWDRIVE_GPG_ARGS      Extra args for get/set (${gpg_args:-<none>})"
+    echo "    PWDRIVE_COPY_CMD      Copy command (${copy_cmd:-<none>})"
     exit $1
 }
 
@@ -75,6 +78,12 @@ pwdrive_get() {
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files/$file_id (pwdrive_get)"
     echo $response | base64 -w0 -d | gpg $gpg_args --decrypt
     echo
+}
+
+pwdrive_copy() {
+    { out=$(pwdrive_get "$1" 2>&$err); } {err}>&2
+    [ "$?" -eq 0 ] || exit 1
+    echo -n "$out" | $copy_cmd
 }
 
 pwdrive_lget() {
@@ -188,6 +197,7 @@ _set_globals() {
     refresh_token_path="$home_dir/refresh_token"
     boundary='925a89b43f3caff507db0a86d20a2428007f10b6'
     gpg_args="${PWDRIVE_GPG_ARGS:---no-options --default-recipient-self --quiet}"
+    copy_cmd="${PWDRIVE_COPY_CMD:-xclip -sel c}"
     stdin_is_pipe=0;  [ -t 0 ] || stdin_is_pipe=1
     stdout_is_pipe=0; [ -t 1 ] || stdout_is_pipe=1
 }
