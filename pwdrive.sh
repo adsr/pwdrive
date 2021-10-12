@@ -17,6 +17,7 @@ pwdrive_main() {
         get)        _require_access_token && pwdrive_get "$@";;
         copy)       _require_access_token && pwdrive_copy "$@";;
         lget)       _require_access_token && pwdrive_lget "$@";;
+        grep)       _require_access_token && pwdrive_grep "$@";;
         edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
@@ -96,6 +97,11 @@ pwdrive_lget() {
     else
         echo "$entries"
     fi
+}
+
+pwdrive_grep() {
+    [ -n "$1" ] || _die "Expected str param (pwdrive_grep)"
+    pwdrive_ls | grep "$1"
 }
 
 pwdrive_set() {
