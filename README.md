@@ -77,6 +77,11 @@ To install to a custom directory, supply `DESTDIR`, e.g.:
 
     # DESTDIR=/usr/bin make install
 
+### Android
+
+pwdrive is confirmed to work on Android 11 with
+[Termux](https://termux.com/) 0.117. Earlier versions may work as well.
+
 ### Tip
 
 In order to minimize dependencies, `grep -P` is used to extract JSON fields
