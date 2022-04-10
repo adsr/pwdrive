@@ -17,6 +17,7 @@ pwdrive_main() {
         get)        _require_access_token && pwdrive_get "$@";;
         copy)       _require_access_token && pwdrive_copy "$@";;
         lget)       _require_access_token && pwdrive_lget "$@";;
+        lcopy)      _require_access_token && pwdrive_lcopy "$@";;
         grep)       _require_access_token && pwdrive_grep "$@";;
         edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
@@ -94,6 +95,18 @@ pwdrive_lget() {
         _die "Nothing found for '$1'"
     elif [ $(echo "$entries" | wc -l) -eq 1 -a -n "$entries" ]; then
         pwdrive_get $entries
+    else
+        echo "$entries"
+    fi
+}
+
+pwdrive_lcopy() {
+    [ -n "$1" ] || _die "Expected str param (pwdrive_lcopy)"
+    entries=$(pwdrive_ls | grep "$1")
+    if [ -z "$entries" ]; then
+        _die "Nothing found for '$1'"
+    elif [ $(echo "$entries" | wc -l) -eq 1 -a -n "$entries" ]; then
+        pwdrive_copy $entries
     else
         echo "$entries"
     fi
