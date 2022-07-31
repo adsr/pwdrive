@@ -51,11 +51,15 @@ which is very difficult to brute force without the GPG key.
     Commands:
         ls                    List all entries
         ls <str>              List all entries prefixed by str
-        set <entry> <pass>    Set password for entry
+        set <entry>           Set password for entry via prompt
         set <entry> -         Set password for entry from stdin
-        get <entry>           Get password for entry
+        set <entry> <pass>    Set password for entry (not preferred)
+        get <entry>           Print password for entry on stdout
+        copy <entry>          Copy password to clipboard (via $PWDRIVE_COPY_CMD)
         lget <str>            Get entry matching str, or ls if multiple
-        edit <entry>          Edit password for entry via $EDITOR
+        lcopy <str>           Copy entry matching str, or ls if multiple
+        grep <str>            Print entries matching str
+        edit <entry>          Edit password for entry (via $EDITOR)
         rm <entry>            Remove entry
         token                 Print an access token
         gen                   Generate some random passwords
