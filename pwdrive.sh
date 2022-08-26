@@ -56,6 +56,7 @@ pwdrive_usage() {
     echo "    PWDRIVE_HOME          Home dir of pwdrive ($home_dir)"
     echo "    PWDRIVE_GPG_ARGS      Extra args for get/set (${gpg_args:-<none>})"
     echo "    PWDRIVE_COPY_CMD      Copy command (${copy_cmd:-<none>})"
+    echo "    PWDRIVE_PORT          Port to listen on for OAuth callback (${listen_port})"
     exit $1
 }
 
@@ -215,7 +216,8 @@ _set_globals() {
     # TODO Figure out if Google offers a way to do OAuth without a secret
     client_secret='86Ev0arsPbBlp6J5v9IZU4Rq'
     scope='https://www.googleapis.com/auth/drive.appdata+https://www.googleapis.com/auth/drive.file'
-    redirect_uri='urn:ietf:wg:oauth:2.0:oob'
+    listen_port="${PWDRIVE_PORT:-49871}"
+    redirect_uri="http://localhost:$listen_port/"
     refresh_token_path="$home_dir/refresh_token"
     boundary='925a89b43f3caff507db0a86d20a2428007f10b6'
     gpg_args="${PWDRIVE_GPG_ARGS:---no-options --default-recipient-self --quiet}"
@@ -225,7 +227,7 @@ _set_globals() {
 }
 
 _check_reqs() {
-    for req in gpg curl grep mktemp mkdir cat base64; do
+    for req in gpg curl grep mktemp mkdir cat base64 nc; do
         which $req &>/dev/null || _die "Expected $req in PATH (_check_reqs)"
     done
 }
@@ -268,9 +270,10 @@ _fetch_refresh_token() {
     echo
     echo "    $auth_url"
     echo
-    echo 'Then paste in the auth code and press ENTER:'
-    read code
-    echo
+    echo 'and allow access. This will timeout in 60 seconds.'
+    local code=$(echo -en "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" | \
+        nc -w60 -v -l -p $listen_port | \
+        grep -m1 -Po '(?<=code=).+(?=&)')
     [ -n "$code" ] || _die "Empty auth code (_fetch_refresh_token)"
     response=$(curl -sf 'https://accounts.google.com/o/oauth2/token' \
         -d "client_id=$client_id" \
