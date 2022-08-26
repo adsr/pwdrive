@@ -222,13 +222,21 @@ _set_globals() {
     boundary='925a89b43f3caff507db0a86d20a2428007f10b6'
     gpg_args="${PWDRIVE_GPG_ARGS:---no-options --default-recipient-self --quiet}"
     copy_cmd="${PWDRIVE_COPY_CMD:-xclip -sel c}"
+    _set_netcat_prog
     stdin_is_pipe=0;  [ -t 0 ] || stdin_is_pipe=1
     stdout_is_pipe=0; [ -t 1 ] || stdout_is_pipe=1
 }
 
+_set_netcat_prog() {
+    for netcat_prog in nc ncat netcat; do
+        command -v $netcat_prog &>/dev/null && return
+    done
+    _die "Expected nc, ncat, or netcat in PATH (_set_netcat_prog)"
+}
+
 _check_reqs() {
-    for req in gpg curl grep mktemp mkdir cat base64 nc; do
-        which $req &>/dev/null || _die "Expected $req in PATH (_check_reqs)"
+    for req in gpg curl grep mktemp mkdir cat base64; do
+        command -v $req &>/dev/null || _die "Expected $req in PATH (_check_reqs)"
     done
 }
 
@@ -272,7 +280,7 @@ _fetch_refresh_token() {
     echo
     echo 'and allow access. This will timeout in 60 seconds.'
     local code=$(echo -en "HTTP/1.0 200 OK\r\nContent-Length: 0\r\n\r\n" | \
-        nc -w60 -v -l -p $listen_port | \
+        $netcat_prog -w60 -v -l -p $listen_port | \
         grep -m1 -Po '(?<=code=).+(?=&)')
     [ -n "$code" ] || _die "Empty auth code (_fetch_refresh_token)"
     response=$(curl -sf 'https://accounts.google.com/o/oauth2/token' \
