@@ -15,7 +15,9 @@ Passwords are stored as GnuPG-encrypted files on Google Drive.
 
 In addition to Bash, the following programs need to be in `PATH`:
 
-    gpg curl grep mktemp mkdir cat base64 sort
+    gpg curl grep mktemp mkdir cat base64 sort ( nc | ncat )
+
+netcat can be either the BSD or traditional version.
 
 You also need a working GPG setup:
 
@@ -70,6 +72,8 @@ which is very difficult to brute force without the GPG key.
         PWDRIVE_ACCESS_TOKEN  Use this access token instead of fetching one
         PWDRIVE_HOME          Home dir of pwdrive (~/.pwdrive)
         PWDRIVE_GPG_ARGS      Extra args for get/set (--no-options --default-recipient-self --quiet)
+        PWDRIVE_COPY_CMD      Copy command (xclip -sel c)
+        PWDRIVE_PORT          Port to listen on for OAuth callback (49871)
 
 ### Installing
 
