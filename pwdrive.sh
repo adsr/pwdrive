@@ -21,6 +21,7 @@ pwdrive_main() {
         grep)       _require_access_token && pwdrive_grep "$@";;
         edit)       _require_access_token && pwdrive_edit "$@";;
         rm)         _require_access_token && pwdrive_rm "$@";;
+        mv)         _require_access_token && pwdrive_mv "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
         gen)        pwdrive_gen "$@";;
         help)       pwdrive_usage 0;;
@@ -46,6 +47,7 @@ pwdrive_usage() {
     echo "    grep <str>            Print entries matching str"
     echo "    edit <entry>          Edit password for entry (via \$EDITOR)"
     echo "    rm <entry>            Remove entry"
+    echo "    mv <from> <to>        Rename entry"
     echo "    token                 Print an access token"
     echo "    gen                   Generate some random passwords"
     echo "    help                  Show pwdrive usage"
@@ -124,7 +126,7 @@ pwdrive_grep() {
 pwdrive_set() {
     name="$1"
     [ -n "$name" ] || _die "Expected entry param (pwdrive_set)"
-    [ "$stdin_is_pipe" -eq 1 ] && pass="$(cat)"
+    [ "$stdin_is_pipe" -eq 1 -o "$2" = '-' ] && pass="$(cat)"
     [ -z "$pass" -a -n "$2" ] && pass="$2"
     if [ -z "$pass" ]; then
         read -sp 'Enter password:' pass1; echo
@@ -183,6 +185,14 @@ pwdrive_rm() {
         -X DELETE \
         -H "Authorization: Bearer $access_token"
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files/$file_id (pwdrive_rm)"
+}
+
+pwdrive_mv() {
+    local target=$1
+    local rename=$2
+    [ -n "$target" ] || _die "Expected target param (pwdrive_mv)"
+    [ -n "$rename" ] || _die "Expected rename param (pwdrive_mv)"
+    { pwdrive_get "$target" | pwdrive_set "$rename" -; } && pwdrive_rm "$target"
 }
 
 pwdrive_token() {
