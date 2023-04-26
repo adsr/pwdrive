@@ -200,15 +200,59 @@ pwdrive_token() {
 }
 
 pwdrive_gen() {
-    chars='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!#$%&*+-=?@^_'
-    nchars=${#chars}
-    p=0; while [ $p -lt 8 ]; do
-        pw=''
-        i=0; while [ $i -lt 24 ]; do
+    _pwdrive_gen_rand
+    _pwdrive_gen_words
+}
+
+_pwdrive_gen_words() {
+    command -v shuf &>/dev/null  || return
+    command -v paste &>/dev/null || return
+    [ -f /usr/share/dict/words ] || return
+    local tweak_odds=50
+    local p=0; while [ $p -lt 8 ]; do
+        local pw=''
+        local q=0; while [ $q -lt 3 ]; do
+            pw+=$(_pwdrive_gen_word $tweak_odds)
+            pw+=' '
+            q=$((q+1))
+        done
+        echo $pw
+        p=$((p+1))
+        tweak_odds=$((tweak_odds / 2))
+    done
+}
+
+_pwdrive_gen_word() {
+    local tweak_odds=$1
+    [ $tweak_odds -lt 8 ] && tweak_odds=8
+    local nums='0123456789'
+    local syms='!#$%&*+-=?@^_'
+    local w=$(shuf -n1 /usr/share/dict/words)
+    local word=''
+    for ((i=0; i<${#w}; i++)); do
+        c=${w:i:1}
+        [ "$c" == "'" ] && continue
+        [ $i -eq 0 ] && word+=$c && continue
+        case $((RANDOM % tweak_odds)) in
+            0) word+=${c^} ;;
+            1) word+=${nums:$(($RANDOM % ${#nums})):1} ;;
+            2) word+=${syms:$(($RANDOM % ${#syms})):1} ;;
+            *) word+=$c ;;
+        esac
+    done
+    echo $word
+}
+
+_pwdrive_gen_rand() {
+    local chars='abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!#$%&*+-=?@^_'
+    local nchars=${#chars}
+    local p=0; while [ $p -lt 8 ]; do
+        local pw=''
+        local q=0; while [ $q -lt 24 ]; do
             r=$((RANDOM % nchars))
-            c=${chars:$r:1}
-            pw="${pw}${c}"
-            i=$((i+1))
+            c=${chars:r:1}
+            pw+=$c
+            q=$((q+1))
         done
         echo $pw
         p=$((p+1))
