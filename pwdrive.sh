@@ -23,6 +23,9 @@ pwdrive_main() {
         rm)         _require_access_token && pwdrive_rm "$@";;
         mv)         _require_access_token && pwdrive_mv "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
+        ls_write)   _require_access_token && pwdrive_ls >$ls_entries;;
+        ls_read)    cat $ls_entries 2>/dev/null;;
+        ls_exists)  test -f $ls_entries;;
         gen)        pwdrive_gen "$@";;
         help)       pwdrive_usage 0;;
         *)          pwdrive_usage 1;;
@@ -273,6 +276,7 @@ _set_globals() {
     listen_port="${PWDRIVE_PORT:-49871}"
     redirect_uri="http://localhost:$listen_port/"
     refresh_token_path="$home_dir/refresh_token"
+    ls_entries="$home_dir/entries"
     boundary='925a89b43f3caff507db0a86d20a2428007f10b6'
     gpg_args="${PWDRIVE_GPG_ARGS:---no-options --default-recipient-self --quiet}"
     copy_cmd="${PWDRIVE_COPY_CMD:-xclip -sel c}"
