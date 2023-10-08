@@ -23,9 +23,13 @@ pwdrive_main() {
         rm)         _require_access_token && pwdrive_rm "$@";;
         mv)         _require_access_token && pwdrive_mv "$@";;
         token)      _require_access_token && pwdrive_token "$@";;
+        lsw)        ;&
         ls_write)   _require_access_token && pwdrive_ls >$ls_entries;;
+        lsr)        ;&
         ls_read)    cat $ls_entries 2>/dev/null;;
         ls_exists)  test -f $ls_entries;;
+        lsd)        ;&
+        ls_diff)    diff <("$0" ls) <("$0" lsr);;
         gen)        pwdrive_gen "$@";;
         help)       pwdrive_usage 0;;
         *)          pwdrive_usage 1;;
