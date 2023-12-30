@@ -184,8 +184,8 @@ pwdrive_edit() {
     $EDITOR $edit_file
     [ "$?" -eq 0 ] || { rm -f $edit_file; _die "EDITOR exited non-zero (pwdrive_edit)"; }
     (stdin_is_pipe=1; pwdrive_set "$@" <$edit_file)
+    [ "$?" -eq 0 ] || { rm -f $edit_file; _die "Set failed (pwdrive_edit)"; }
     rm -f $edit_file
-    [ "$?" -eq 0 ] || _die "Set failed (pwdrive_edit)"
 }
 
 pwdrive_rm() {
