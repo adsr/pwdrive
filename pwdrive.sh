@@ -63,6 +63,7 @@ pwdrive_usage() {
     echo "    PWDRIVE_GPG_ARGS      Extra args for get/set (${gpg_args:-<none>})"
     echo "    PWDRIVE_COPY_CMD      Copy command (${copy_cmd:-<none>})"
     echo "    PWDRIVE_PORT          Port to listen on for OAuth callback (${listen_port})"
+    echo "    PWDRIVE_NO_AUTO_LSW   If non-empty, disable auto update of $home_dir/entries"
     exit $1
 }
 
@@ -171,6 +172,7 @@ pwdrive_set() {
     curlec="$?"
     rm -f $post_data
     [ "$curlec" -eq 0 ] || _die "Query failed: www.googleapis.com/upload/drive/v3/files (pwdrive_set)"
+    _auto_ls_write
 }
 
 pwdrive_edit() {
@@ -193,6 +195,7 @@ pwdrive_rm() {
         -X DELETE \
         -H "Authorization: Bearer $access_token"
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files/$file_id (pwdrive_rm)"
+    _auto_ls_write
 }
 
 pwdrive_mv() {
@@ -374,6 +377,10 @@ _fetch_file_id_by_name() {
         --data-urlencode "q=name = '$1'")
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files (_fetch_file_id_by_name)"
     file_id=$(echo $response | grep -Po '(?<="id": ").+?(?=")')
+}
+
+_auto_ls_write() {
+    [ -z "$PWDRIVE_NO_AUTO_LSW" ] && pwdrive_ls_write
 }
 
 pwdrive_main "$@"
