@@ -18,6 +18,8 @@ pwdrive_main() {
         copy)  _require_access_token && pwdrive_copy "$@";;
         lget)  _require_access_token && pwdrive_lget "$@";;
         lcopy) _require_access_token && pwdrive_lcopy "$@";;
+        cget)  _require_access_token && pwdrive_cget "$@";;
+        ccopy) _require_access_token && pwdrive_ccopy "$@";;
         grep)  _require_access_token && pwdrive_grep "$@";;
         edit)  _require_access_token && pwdrive_edit "$@";;
         rm)    _require_access_token && pwdrive_rm "$@";;
@@ -46,8 +48,10 @@ pwdrive_usage() {
     echo "    set <entry> <secret>  Set secret for entry (not preferred)"
     echo "    get <entry>           Print secret for entry on stdout"
     echo "    copy <entry>          Copy secret to clipboard (via \$PWDRIVE_COPY_CMD)"
-    echo "    lget <str>            Get entry matching str, or ls if multiple"
+    echo "    lget <str>            Print entry matching str, or ls if multiple"
     echo "    lcopy <str>           Copy entry matching str, or ls if multiple"
+    echo "    cget <entry>          Print entry contents after first colon (:)"
+    echo "    ccopy <entry>         Copy entry contents after first colon (:)"
     echo "    grep <str>            Print entries matching str"
     echo "    edit <entry>          Edit secret for entry (via \$EDITOR)"
     echo "    rm <entry>            Remove entry"
@@ -99,6 +103,16 @@ pwdrive_get() {
 
 pwdrive_copy() {
     { out=$(pwdrive_get "$1" 2>&$err); } {err}>&2
+    [ "$?" -eq 0 ] || exit 1
+    echo -n "$out" | $copy_cmd
+}
+
+pwdrive_cget() {
+    pwdrive_get "$1" | cut -d: -f2-
+}
+
+pwdrive_ccopy() {
+    { out=$(pwdrive_cget "$1" 2>&$err); } {err}>&2
     [ "$?" -eq 0 ] || exit 1
     echo -n "$out" | $copy_cmd
 }
