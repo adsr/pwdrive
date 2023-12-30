@@ -12,27 +12,24 @@ pwdrive_main() {
     _check_reqs
     _maybe_init
     case "$pwdrive_cmd" in
-        ls)         _require_access_token && pwdrive_ls "$@";;
-        set)        _require_access_token && pwdrive_set "$@";;
-        get)        _require_access_token && pwdrive_get "$@";;
-        copy)       _require_access_token && pwdrive_copy "$@";;
-        lget)       _require_access_token && pwdrive_lget "$@";;
-        lcopy)      _require_access_token && pwdrive_lcopy "$@";;
-        grep)       _require_access_token && pwdrive_grep "$@";;
-        edit)       _require_access_token && pwdrive_edit "$@";;
-        rm)         _require_access_token && pwdrive_rm "$@";;
-        mv)         _require_access_token && pwdrive_mv "$@";;
-        token)      _require_access_token && pwdrive_token "$@";;
-        lsw)        ;&
-        ls_write)   _require_access_token && pwdrive_ls >$ls_entries;;
-        lsr)        ;&
-        ls_read)    cat $ls_entries 2>/dev/null;;
-        ls_exists)  test -f $ls_entries;;
-        lsd)        ;&
-        ls_diff)    diff <("$0" ls) <("$0" lsr);;
-        gen)        pwdrive_gen "$@";;
-        help)       pwdrive_usage 0;;
-        *)          pwdrive_usage 1;;
+        ls)    _require_access_token && pwdrive_ls "$@";;
+        set)   _require_access_token && pwdrive_set "$@";;
+        get)   _require_access_token && pwdrive_get "$@";;
+        copy)  _require_access_token && pwdrive_copy "$@";;
+        lget)  _require_access_token && pwdrive_lget "$@";;
+        lcopy) _require_access_token && pwdrive_lcopy "$@";;
+        grep)  _require_access_token && pwdrive_grep "$@";;
+        edit)  _require_access_token && pwdrive_edit "$@";;
+        rm)    _require_access_token && pwdrive_rm "$@";;
+        mv)    _require_access_token && pwdrive_mv "$@";;
+        token) _require_access_token && pwdrive_token "$@";;
+        lsw)   _require_access_token && pwdrive_ls_write "$@";;
+        lsr)   cat $ls_entries 2>/dev/null;;
+        lse)   test -f $ls_entries;;
+        lsd)   diff <("$0" ls) <("$0" lsr);;
+        gen)   pwdrive_gen "$@";;
+        help)  pwdrive_usage 0;;
+        *)     pwdrive_usage 1;;
     esac
 }
 
@@ -80,6 +77,10 @@ pwdrive_ls() {
         --data-urlencode "$query")
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files (pwdrive_ls)"
     echo $response | grep -Po '(?<="name": ").+?(?=")' | sort
+}
+
+pwdrive_ls_write() {
+    pwdrive_ls >$ls_entries
 }
 
 pwdrive_get() {

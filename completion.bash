@@ -15,8 +15,8 @@ _pwdrive_completion() {
 }
 
 _pwdrive_entries() {
-    pwdrive ls_exists || pwdrive ls_write
-    pwdrive ls_read | tr '\n' ' '
+    pwdrive lse || pwdrive lsw
+    pwdrive lsr | tr '\n' ' '
 }
 
 complete -F _pwdrive_completion pwdrive
