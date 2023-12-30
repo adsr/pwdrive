@@ -5,13 +5,17 @@ Passwords are stored as GnuPG-encrypted files on Google Drive.
 
 ### Synopsis
 
-    $ pwdrive set aol leetpw    # Store encrypted entry
-    $ pwdrive ls                # List entries
+    $ pwdrive set aol       # Store encrypted secret
+    Enter secret:...
+    Enter secret again:...
+    $ pwdrive ls            # List entries
     aol
-    $ pwdrive get aol           # Fetch and decrypt entry
-    leetpw
+    $ pwdrive copy aol      # Fetch and decrypt secret onto clipboard
+    ...
 
 ### Requirements
+
+You need a working GPG setup: https://www.gnupg.org/gph/en/manual/c14.html
 
 In addition to Bash, the following programs need to be in `PATH`:
 
@@ -19,9 +23,8 @@ In addition to Bash, the following programs need to be in `PATH`:
 
 netcat can be either the BSD or traditional version.
 
-You also need a working GPG setup:
-
-https://www.gnupg.org/gph/en/manual/c14.html
+The `copy` command requires `xclip` by default, but can be customized via the
+`PWDRIVE_COPY_CMD` environment variable.
 
 ### How it works
 
@@ -53,16 +56,17 @@ which is very difficult to brute force without the GPG key.
     Commands:
         ls                    List all entries
         ls <str>              List all entries prefixed by str
-        set <entry>           Set password for entry via prompt
-        set <entry> -         Set password for entry from stdin
-        set <entry> <pass>    Set password for entry (not preferred)
-        get <entry>           Print password for entry on stdout
-        copy <entry>          Copy password to clipboard (via $PWDRIVE_COPY_CMD)
+        set <entry>           Set secret for entry via prompt
+        set <entry> -         Set secret for entry from stdin
+        set <entry> <pass>    Set secret for entry (not preferred)
+        get <entry>           Print secret for entry on stdout
+        copy <entry>          Copy secret to clipboard (via $PWDRIVE_COPY_CMD)
         lget <str>            Get entry matching str, or ls if multiple
         lcopy <str>           Copy entry matching str, or ls if multiple
         grep <str>            Print entries matching str
-        edit <entry>          Edit password for entry (via $EDITOR)
+        edit <entry>          Edit secret for entry (via $EDITOR)
         rm <entry>            Remove entry
+        mv <from> <to>        Rename entry
         token                 Print an access token
         gen                   Generate some random passwords
         help                  Show pwdrive usage
@@ -74,6 +78,7 @@ which is very difficult to brute force without the GPG key.
         PWDRIVE_GPG_ARGS      Extra args for get/set (--no-options --default-recipient-self --quiet)
         PWDRIVE_COPY_CMD      Copy command (xclip -sel c)
         PWDRIVE_PORT          Port to listen on for OAuth callback (49871)
+        PWDRIVE_NO_AUTO_LSW   If non-empty, disable auto update of ~/.pwdrive/entries
 
 ### Installing
 
