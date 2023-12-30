@@ -41,15 +41,15 @@ pwdrive_usage() {
     echo "Commands:"
     echo "    ls                    List all entries"
     echo "    ls <str>              List all entries prefixed by str"
-    echo "    set <entry>           Set password for entry via prompt"
-    echo "    set <entry> -         Set password for entry from stdin"
-    echo "    set <entry> <pass>    Set password for entry (not preferred)"
-    echo "    get <entry>           Print password for entry on stdout"
-    echo "    copy <entry>          Copy password to clipboard (via \$PWDRIVE_COPY_CMD)"
+    echo "    set <entry>           Set secret for entry via prompt"
+    echo "    set <entry> -         Set secret for entry from stdin"
+    echo "    set <entry> <secret>  Set secret for entry (not preferred)"
+    echo "    get <entry>           Print secret for entry on stdout"
+    echo "    copy <entry>          Copy secret to clipboard (via \$PWDRIVE_COPY_CMD)"
     echo "    lget <str>            Get entry matching str, or ls if multiple"
     echo "    lcopy <str>           Copy entry matching str, or ls if multiple"
     echo "    grep <str>            Print entries matching str"
-    echo "    edit <entry>          Edit password for entry (via \$EDITOR)"
+    echo "    edit <entry>          Edit secret for entry (via \$EDITOR)"
     echo "    rm <entry>            Remove entry"
     echo "    mv <from> <to>        Rename entry"
     echo "    token                 Print an access token"
@@ -135,15 +135,15 @@ pwdrive_grep() {
 pwdrive_set() {
     name="$1"
     [ -n "$name" ] || _die "Expected entry param (pwdrive_set)"
-    [ "$stdin_is_pipe" -eq 1 -o "$2" = '-' ] && pass="$(cat)"
-    [ -z "$pass" -a -n "$2" ] && pass="$2"
-    if [ -z "$pass" ]; then
-        read -sp 'Enter password:' pass1; echo
-        read -sp 'Enter password again:' pass2; echo
-        [ "$pass1" = "$pass2" ] || _die "Passwords do not match (pwdrive_set)"
-        pass=$pass1
+    [ "$stdin_is_pipe" -eq 1 -o "$2" = '-' ] && secret="$(cat)"
+    [ -z "$secret" -a -n "$2" ] && secret="$2"
+    if [ -z "$secret" ]; then
+        read -sp 'Enter secret:' secret1; echo
+        read -sp 'Enter secret again:' secret2; echo
+        [ "$secret1" = "$secret2" ] || _die "Secrets do not match (pwdrive_set)"
+        secret=$secret1
     fi
-    [ -n "$pass" ] || _die "Expected pass as stdin, param, or input (pwdrive_set)"
+    [ -n "$secret" ] || _die "Expected secret as stdin, param, or input (pwdrive_set)"
     _fetch_file_id_by_name "$name"
     if [ -n "$file_id" ]; then
         method='PATCH'
@@ -162,7 +162,7 @@ pwdrive_set() {
     fi
     echo -en "--$boundary\r\n" >>$post_data
     echo -en "Content-Type: application/octet-stream\r\n\r\n" >>$post_data
-    echo -n "$pass" | gpg $gpg_args --encrypt | base64 -w0 >>$post_data
+    echo -n "$secret" | gpg $gpg_args --encrypt | base64 -w0 >>$post_data
     echo -en "\r\n--$boundary--" >>$post_data
     curl -sf "https://www.googleapis.com/upload/drive/v3/files$uri?uploadType=multipart" \
        -X $method \
