@@ -3,7 +3,7 @@ set -o pipefail
 
 pwdrive_desc='GnuPG+GDrive-based password vault'
 pwdrive_url='https://github.com/adsr/pwdrive'
-pwdrive_version='0.5'
+pwdrive_version='0.6'
 pwdrive_cmd=$1
 shift
 
@@ -15,6 +15,7 @@ pwdrive_main() {
         ls)    _require_access_token && pwdrive_ls "$@";;
         set)   _require_access_token && pwdrive_set "$@";;
         get)   _require_access_token && pwdrive_get "$@";;
+        qr)    _require_access_token && pwdrive_qr "$@";;
         copy)  _require_access_token && pwdrive_copy "$@";;
         lget)  _require_access_token && pwdrive_lget "$@";;
         lcopy) _require_access_token && pwdrive_lcopy "$@";;
@@ -47,6 +48,7 @@ pwdrive_usage() {
     echo "    set <entry> -         Set secret for entry from stdin"
     echo "    set <entry> <secret>  Set secret for entry (not preferred)"
     echo "    get <entry>           Print secret for entry on stdout"
+    echo "    qr <entry>            Print secret as QR code on stdout"
     echo "    copy <entry>          Copy secret to clipboard (via \$PWDRIVE_COPY_CMD)"
     echo "    lget <str>            Print entry matching str, or ls if multiple"
     echo "    lcopy <str>           Copy entry matching str, or ls if multiple"
@@ -99,6 +101,11 @@ pwdrive_get() {
     [ "$?" -eq 0 ] || _die "Query failed: www.googleapis.com/drive/v3/files/$file_id (pwdrive_get)"
     echo $response | base64 -w0 -d | gpg $gpg_args --decrypt
     echo
+}
+
+pwdrive_qr() {
+    command -v qrencode &>/dev/null || _die 'Required qrencode in PATH (pwdrive_qr)'
+    pwdrive_get "$@" | qrencode -o- -t ANSI256 -m2
 }
 
 pwdrive_copy() {
