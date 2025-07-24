@@ -105,7 +105,7 @@ pwdrive_get() {
 
 pwdrive_qr() {
     command -v qrencode &>/dev/null || _die 'Required qrencode in PATH (pwdrive_qr)'
-    pwdrive_get "$@" | qrencode -o- -t ANSI256 -m2
+    pwdrive_get "$@" | qrencode -o- -t UTF8 -m2
 }
 
 pwdrive_copy() {
