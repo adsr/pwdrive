@@ -21,6 +21,8 @@ pwdrive_main() {
         lcopy) _require_access_token && pwdrive_lcopy "$@";;
         cget)  _require_access_token && pwdrive_cget "$@";;
         ccopy) _require_access_token && pwdrive_ccopy "$@";;
+        uget)  _require_access_token && pwdrive_uget "$@";;
+        ucopy) _require_access_token && pwdrive_ucopy "$@";;
         grep)  _require_access_token && pwdrive_grep "$@";;
         edit)  _require_access_token && pwdrive_edit "$@";;
         rm)    _require_access_token && pwdrive_rm "$@";;
@@ -54,6 +56,8 @@ pwdrive_usage() {
     echo "    lcopy <str>           Copy entry matching str, or ls if multiple"
     echo "    cget <entry>          Print entry contents after first colon (:)"
     echo "    ccopy <entry>         Copy entry contents after first colon (:)"
+    echo "    uget <entry>          Print entry contents before first colon (:)"
+    echo "    ucopy <entry>         Copy entry contents before first colon (:)"
     echo "    grep <str>            Print entries matching str"
     echo "    edit <entry>          Edit secret for entry (via \$EDITOR)"
     echo "    rm <entry>            Remove entry"
@@ -120,6 +124,16 @@ pwdrive_cget() {
 
 pwdrive_ccopy() {
     { out=$(pwdrive_cget "$1" 2>&$err); } {err}>&2
+    [ "$?" -eq 0 ] || exit 1
+    echo -n "$out" | $copy_cmd
+}
+
+pwdrive_uget() {
+    pwdrive_get "$1" | cut -d: -f1
+}
+
+pwdrive_ucopy() {
+    { out=$(pwdrive_uget "$1" 2>&$err); } {err}>&2
     [ "$?" -eq 0 ] || exit 1
     echo -n "$out" | $copy_cmd
 }
